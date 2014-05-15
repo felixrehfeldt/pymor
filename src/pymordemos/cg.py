@@ -29,6 +29,7 @@ import math as m
 from docopt import docopt
 import numpy as np
 
+
 from pymor.analyticalproblems import EllipticProblem
 from pymor.discretizers import discretize_elliptic_cg
 from pymor.domaindescriptions import BoundaryType
@@ -68,6 +69,9 @@ def cg_demo(nrhs, ndirichlet, nneumann):
 
         print('Solve ...')
         U = discretization.solve()
+
+        exact = GenericFunction(lambda X:  (np.sin(X[...,0]*4*np.pi)*np.sin(X[...,1] * 4 * np.pi)), 2)
+        U_ex = NumpyVectorArray(exact.evaluate(_['grid'].center(2)))
 
         print('Plot ...')
         discretization.visualize(U, title='Triagrid(({0},{0}))'.format(n))
