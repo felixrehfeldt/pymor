@@ -37,7 +37,7 @@ from pymor.functions import GenericFunction
 
 
 def cg_demo(nrhs, ndirichlet, nneumann):
-    rhs0 = GenericFunction(lambda X: np.ones(X.shape[:-1]) * 10, 2)                      # NOQA
+    rhs0 = GenericFunction(lambda X: (-16*np.pi*np.sin(X[...,0]*4*np.pi)*np.sin(X[...,1] * 4 * np.pi)), 2)                      # NOQA
     rhs1 = GenericFunction(lambda X: (X[..., 0] - 0.5) ** 2 * 1000, 2)                   # NOQA
     dirichlet0 = GenericFunction(lambda X: np.zeros(X.shape[:-1]), 2)                    # NOQA
     dirichlet1 = GenericFunction(lambda X: np.ones(X.shape[:-1]), 2)                     # NOQA
@@ -46,6 +46,7 @@ def cg_demo(nrhs, ndirichlet, nneumann):
     domain1 = RectDomain(right=BoundaryType('neumann'))                                  # NOQA
     domain2 = RectDomain(right=BoundaryType('neumann'), top=BoundaryType('neumann'))     # NOQA
     domain3 = RectDomain(right=BoundaryType('neumann'), top=BoundaryType('neumann'), bottom=BoundaryType('neumann'))  # NOQA
+    exact = GenericFunction(lambda X: np.sin(X[...,0]*4*np.pi)* np.sin(X[...,1]*4*np.pi))
 
     assert 0 <= nrhs <= 1, ValueError('Invalid rhs number.')
     rhs = eval('rhs{}'.format(nrhs))
