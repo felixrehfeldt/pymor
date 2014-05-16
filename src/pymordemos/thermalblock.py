@@ -119,6 +119,9 @@ def thermalblock_demo(args):
         h1_err_max = -1
         h1_est_max = -1
         cond_max = -1
+        h1_err_list = []
+        h1_est_list = []
+        cond_list = []
         for mu in mus:
             print('.', end='')
             u = rd.solve(mu)
@@ -127,6 +130,9 @@ def thermalblock_demo(args):
             h1_err = d.h1_norm(U - URB)[0]
             h1_est = rd.estimate(u, mu=mu)
             cond = np.linalg.cond(rd.operator.assemble(mu)._matrix)
+            h1_err_list.append(h1_err)
+            h1_est_list.append(h1_est)
+            cond_list.append(cond)
             if h1_err > h1_err_max:
                 h1_err_max = h1_err
                 mumax = mu
@@ -137,7 +143,7 @@ def thermalblock_demo(args):
                 cond_max = cond
                 cond_max_mu = mu
         print()
-        return h1_err_max, mumax, h1_est_max, mu_est_max, cond_max, cond_max_mu
+        return h1_err_list, h1_err_max, mumax, h1_est_list, h1_est_max, mu_est_max, cond_list, cond_max, cond_max_mu
 
     tic = time.time()
 
@@ -150,7 +156,7 @@ def thermalblock_demo(args):
     rd_rcs = [reduce_to_subbasis(rb_discretization, N, reconstructor)[:2] for N in Ns]
     mus = list(discretization.parameter_space.sample_randomly(args['--test']))
 
-    errs, err_mus, ests, est_mus, conds, cond_mus = zip(*(error_analysis(discretization, rd, rc, mus)
+    err_list, errs, err_mus, est_list, ests, est_mus, cond_list, conds, cond_mus = zip(*(error_analysis(discretization, rd, rc, mus)
                                                         for rd, rc in rd_rcs))
     h1_err_max = errs[-1]
     mumax = err_mus[-1]
@@ -184,6 +190,7 @@ def thermalblock_demo(args):
 
     sys.stdout.flush()
 
+
     if args['--plot-error-sequence']:
         plt.semilogy(Ns, errs, Ns, ests)
         plt.legend(('error', 'estimator'))
@@ -193,7 +200,7 @@ def thermalblock_demo(args):
         URB = reconstructor.reconstruct(rb_discretization.solve(mumax))
         discretization.visualize((U, URB, U - URB), legend=('Detailed Solution', 'Reduced Solution', 'Error'),
                                  title='Maximum Error Solution', separate_colorbars=True, block=True)
-
+    return err_list[0], est_list[0], cond_list[0]
 
 if __name__ == '__main__':
     # parse arguments
